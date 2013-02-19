@@ -4,3 +4,4 @@ dist
 build
 redact.egg-info
 .ropeproject
+/venv

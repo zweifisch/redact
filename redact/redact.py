@@ -2,23 +2,18 @@ import sys
 import yaml
 from os import path
 import re
-
-usage = """usage:
-
-redact data.yaml
-
-redact --extension tpl data.yaml"""
+from opster import command
 
 
-def get_data():
+def get_data(filename):
 	if not sys.stdin.isatty():
 		f = sys.stdin
 	else:
-		if len(sys.argv) > 1:
-			if path.exists(sys.argv[-1]):
-				f = open(sys.argv[-1])
+		if filename:
+			if path.exists(filename):
+				f = open(filename)
 			else:
-				print("%s not found" % sys.argv[-1])
+				print("%s not found" % filename)
 				sys.exit(1)
 		else:
 			return None
@@ -27,20 +22,13 @@ def get_data():
 	return data
 
 
-def get_extension():
-	extension = "tpl"
-	for idx, arg in enumerate(sys.argv[:-1]):
-		if arg == '--extension':
-			extension = sys.argv[idx + 1]
-	return extension
-
-
-def parse(data, ext):
+def parse(data, extension):
 	global_names = {}
 	local_names = {}
 	for key, val in data.items():
 		if isinstance(val, dict) or val is None:
-			dotfile = "%s.%s" % (path.expanduser(key), ext)
+			dotfile = "%s.%s" % (path.expanduser(key), extension)
+			print("found %s" % dotfile)
 			if path.exists(dotfile) and not path.isdir(dotfile):
 				local_names[path.expanduser(key)] = {} if val is None else val
 			else:
@@ -68,18 +56,22 @@ def render_from_tmpl(tmpl, names, output):
 			return True
 
 
-def redact():
-	data = get_data()
+@command(usage='[--extension tpl] data.yaml')
+def main(dirname=None, extension=('e', 'tpl', 'extion of the template file')):
+	'''rendering dotfiles from template'''
+	data = get_data(dirname)
 	if data is None:
-		print(usage)
-		sys.exit(0)
-	ext = get_extension()
-	global_names, local_names = parse(data, ext)
+		raise command.Error('no input')
+	global_names, local_names = parse(data, extension)
 	if local_names:
 		for tmpl, names in local_names.items():
-			if render_from_tmpl("%s.%s" % (tmpl, ext), dict(global_names, **names), tmpl):
+			if render_from_tmpl("%s.%s" % (tmpl, extension), dict(global_names, **names), tmpl):
 				print("wrote %s" % tmpl)
 			else:
 				print("faied to handle %s" % tmpl)
 	else:
 		print('nothing to do')
+
+
+def redact():
+	main.command()
