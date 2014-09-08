@@ -34,12 +34,12 @@ passwords.yaml
 ```yaml
 email: "foo@foo.com"
 ~/.muttrc:
-	passwd: secret-passwd-for-email
+    passwd: secret-passwd-for-email
 ~/.gitconfig:
 /var/www/config.php:
-	user: username-for-db
-	passwd: secret-passwd-for-db
-	email: admin@mydomain.com
+    user: username-for-db
+    passwd: secret-passwd-for-db
+    email: admin@mydomain.com
 ```
 
 run
