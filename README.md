@@ -12,56 +12,32 @@ pip install redact
 
 ## usage
 
-`~/.muttrc.tpl`
+given a template `~/.muttrc.tpl`
+
 ```
-passwd: #{passwd}
-address: #{email}
+passwd: #{mutt.passwd}
+address: #{mutt.email}
 ```
 
-`.gitconfig.tpl`
-```
-email = #{email}
-```
+render `~/.muttrc` interactively with redact
 
-`/var/www/config.php.tpl`
-```php
-$config['database']['user'] = "#{user}";
-$config['database']['passwd'] = "#{passwd}";
-$config['email']['sender'] = "#{email}";
 ```
-
-passwords.yaml
-```yaml
-email: "foo@foo.com"
-~/.muttrc:
-    passwd: secret-passwd-for-email
-~/.gitconfig:
-/var/www/config.php:
-    user: username-for-db
-    passwd: secret-passwd-for-db
-    email: admin@mydomain.com
+redact ~/.muttrc.tpl
+mutt.password
+> secret
+mutt.email
+> contact@redact.com
+~/.muttrc updated
 ```
 
-run
-```sh
-$ redact passwords.yaml
+keep track of template file locations and save/load variables
+
+```
+redact -t ~/.redact -s ~/.secret ~/.muttrc.tpl
 ```
 
-will generate(overwrite)
-`~/.gitconfig`, `~/.muttrc` and `/var/www/config.php`
+render a list of templates
 
-specify a different extension other than the default `tpl`
-```sh
-$ redact --extension template passwords.yaml
 ```
-
-selectively redact(TBD)
-```sh
-$ redact --sel gitconfig
-$ redact --skip muttrc
-```
-
-using pipe
-```sh
-$ ssh remote-machine "cat ~/passwords.yaml" | redact
+redact -t ~/.redact -s ~/.secret
 ```
